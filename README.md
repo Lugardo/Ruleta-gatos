@@ -17,7 +17,9 @@ python3 server.py
 # luego visita http://localhost:3000
 ```
 
-`server.py` solo usa la stdlib de Python (sin dependencias). Sirve la página y expone una API en `/api/historial` que guarda los datos en `historial.json` junto al servidor. Todas las personas que accedan desde la misma dirección verán y compartirán el mismo historial.
+`server.py` solo usa la stdlib de Python (sin dependencias). Sirve la página y expone una API en `/api/historial` que guarda los datos en una base de datos **SQLite** (`ruleta.db`, también junto al servidor). Todas las personas que accedan desde la misma dirección verán y compartirán el mismo historial.
+
+Si venías de una versión anterior con `historial.json`, al arrancar el servidor se migra automáticamente a la DB y el archivo original se renombra a `historial.json.migrated`.
 
 ### Opción B — modo local (historial por navegador)
 
@@ -37,7 +39,21 @@ La UI indica en qué modo estás con un badge junto a "Historial":
 - `styles.css` — estilos y layout responsive.
 - `script.js` — array de gatos, dibujo de la ruleta y lógica de giro.
 - `server.py` — servidor estático + API `/api/historial` (opcional).
-- `historial.json` — datos persistidos por el servidor (creado en runtime, ignorado por git).
+- `ruleta.db` — base de datos SQLite con la tabla `historial` (creada en runtime, ignorada por git).
+
+### Esquema de la DB
+```sql
+CREATE TABLE historial (
+  id       TEXT PRIMARY KEY,
+  autor    TEXT NOT NULL,
+  pregunta TEXT NOT NULL,
+  gato     TEXT NOT NULL,
+  fecha    TEXT NOT NULL
+);
+CREATE INDEX idx_historial_fecha ON historial(fecha DESC);
+```
+
+Puedes inspeccionarla con `sqlite3 ruleta.db "SELECT * FROM historial;"`.
 
 ## API del servidor
 | Método | Ruta | Descripción |

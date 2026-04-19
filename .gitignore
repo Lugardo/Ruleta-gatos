@@ -1,4 +1,9 @@
+ruleta.db
+ruleta.db-journal
+ruleta.db-wal
+ruleta.db-shm
 historial.json
+historial.json.migrated
 __pycache__/
 *.pyc
 .DS_Store
