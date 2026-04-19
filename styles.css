@@ -431,6 +431,18 @@ body {
   letter-spacing: 0.1em;
 }
 
+.almacen-indicador {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-right: auto;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+.almacen-indicador.remoto { background: #e3f6e7; color: #2e8b57; }
+.almacen-indicador.local  { background: #fff1cc; color: #8a6a1a; }
+
 .historial-lista {
   list-style: none;
   padding: 0;

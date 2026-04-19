@@ -284,37 +284,106 @@ function setEstado(msg, tipo) {
 }
 
 /* ---------- Persistence ---------- */
-function leerHistorial() {
+let usingServer = false;
+
+function leerLocal() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch { return []; }
 }
 
-function escribirHistorial(lista) {
+function escribirLocal(lista) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lista)); }
   catch { /* sin almacenamiento */ }
 }
 
-function guardarEntrada(entrada) {
-  const lista = leerHistorial();
-  lista.unshift(entrada);
-  escribirHistorial(lista.slice(0, 200));
-  renderHistorial();
+async function fetchJson(url, opts) {
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const ct = res.headers.get("content-type") || "";
+  return ct.includes("application/json") ? res.json() : null;
 }
 
-function borrarEntrada(id) {
-  const lista = leerHistorial().filter((e) => e.id !== id);
-  escribirHistorial(lista);
-  renderHistorial();
+async function detectarServidor() {
+  try {
+    await fetchJson("/api/historial");
+    usingServer = true;
+  } catch {
+    usingServer = false;
+  }
+  actualizarIndicadorAlmacen();
 }
 
-function limpiarHistorial() {
-  const total = leerHistorial().length;
-  if (total === 0) return;
-  if (!confirm(`¿Borrar las ${total} preguntas del historial? Esta acción no se puede deshacer.`)) return;
-  localStorage.removeItem(STORAGE_KEY);
-  renderHistorial();
+function actualizarIndicadorAlmacen() {
+  const el = document.getElementById("almacen-indicador");
+  if (!el) return;
+  el.textContent = usingServer ? "🌐 Guardado en servidor" : "💾 Guardado localmente";
+  el.classList.toggle("remoto", usingServer);
+  el.classList.toggle("local", !usingServer);
+}
+
+async function obtenerHistorial() {
+  if (usingServer) {
+    try { return await fetchJson("/api/historial"); }
+    catch { usingServer = false; actualizarIndicadorAlmacen(); }
+  }
+  return leerLocal();
+}
+
+async function guardarEntrada(entrada) {
+  if (usingServer) {
+    try {
+      await fetchJson("/api/historial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entrada),
+      });
+    } catch {
+      usingServer = false;
+      actualizarIndicadorAlmacen();
+    }
+  }
+  if (!usingServer) {
+    const lista = leerLocal();
+    lista.unshift(entrada);
+    escribirLocal(lista.slice(0, 200));
+  }
+  await renderHistorial();
+}
+
+async function borrarEntrada(id) {
+  if (usingServer) {
+    try {
+      await fetch(`/api/historial/${encodeURIComponent(id)}`, { method: "DELETE" });
+    } catch {
+      usingServer = false;
+      actualizarIndicadorAlmacen();
+    }
+  }
+  if (!usingServer) {
+    const lista = leerLocal().filter((e) => e.id !== id);
+    escribirLocal(lista);
+  }
+  await renderHistorial();
+}
+
+async function limpiarHistorial() {
+  const lista = await obtenerHistorial();
+  if (lista.length === 0) return;
+  if (!confirm(`¿Borrar las ${lista.length} preguntas del historial? Esta acción no se puede deshacer.`)) return;
+  if (usingServer) {
+    try {
+      await fetch("/api/historial", { method: "DELETE" });
+    } catch {
+      usingServer = false;
+      actualizarIndicadorAlmacen();
+    }
+  }
+  if (!usingServer) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+  await renderHistorial();
 }
 
 /* ---------- History render ---------- */
@@ -334,8 +403,8 @@ function formatearFecha(iso) {
   } catch { return iso; }
 }
 
-function renderHistorial() {
-  const lista = leerHistorial();
+async function renderHistorial() {
+  const lista = await obtenerHistorial();
   historialLista.innerHTML = lista.map((e) => `
     <li class="historial-item" data-id="${escapar(e.id || "")}">
       <div class="contenido">
@@ -380,6 +449,10 @@ limpiarBtn.addEventListener("click", limpiarHistorial);
 window.addEventListener("resize", setupCanvas);
 
 renderList();
-renderHistorial();
 setupCanvas();
 actualizarGirar();
+
+(async () => {
+  await detectarServidor();
+  await renderHistorial();
+})();

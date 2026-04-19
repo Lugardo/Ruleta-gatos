@@ -10,16 +10,22 @@ Página web estática que muestra una ruleta giratoria con 19 gatos. El flujo es
 
 ## Cómo usarla
 
-Opción 1 — abrir directamente:
-```
-Doble clic en index.html
+### Opción A — modo servidor (historial compartido, recomendado)
+
+```bash
+python3 server.py
+# luego visita http://localhost:3000
 ```
 
-Opción 2 — servidor local (recomendado):
-```bash
-python3 -m http.server 8000
-# luego visita http://localhost:8000
-```
+`server.py` solo usa la stdlib de Python (sin dependencias). Sirve la página y expone una API en `/api/historial` que guarda los datos en `historial.json` junto al servidor. Todas las personas que accedan desde la misma dirección verán y compartirán el mismo historial.
+
+### Opción B — modo local (historial por navegador)
+
+Abre `index.html` directamente, o sírvelo con un static server cualquiera (`python3 -m http.server 8000`). Sin backend, el historial se guarda solo en `localStorage` del navegador.
+
+La UI indica en qué modo estás con un badge junto a "Historial":
+- **🌐 Guardado en servidor** — los datos viven en `historial.json`.
+- **💾 Guardado localmente** — los datos viven solo en este navegador.
 
 ## Stack
 - HTML5 + CSS3 + JavaScript vanilla (sin dependencias).
@@ -30,6 +36,16 @@ python3 -m http.server 8000
 - `index.html` — estructura de la página.
 - `styles.css` — estilos y layout responsive.
 - `script.js` — array de gatos, dibujo de la ruleta y lógica de giro.
+- `server.py` — servidor estático + API `/api/historial` (opcional).
+- `historial.json` — datos persistidos por el servidor (creado en runtime, ignorado por git).
+
+## API del servidor
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET    | `/api/historial`     | Devuelve todas las entradas (JSON array). |
+| POST   | `/api/historial`     | Guarda una entrada (`{id, autor, pregunta, gato, fecha}`). |
+| DELETE | `/api/historial/:id` | Borra la entrada con el id dado. |
+| DELETE | `/api/historial`     | Borra todas las entradas. |
 
 ## Lista de gatos
 Dexter, Marty, Lilo, Lulú, Eddy, Bell, Turoc, Lana, Yeyuni, Catalino, Héctor, Egle, Sonata, Poah, Gris, Dior, Wero, Nimbus, Medio bigote.
