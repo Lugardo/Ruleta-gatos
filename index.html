@@ -16,15 +16,26 @@
       <p class="subtitle">Haz una pregunta y deja que el destino felino decida</p>
     </header>
 
-    <section class="pregunta-card" aria-label="Pregunta para los gatos">
-      <button type="button" class="cta" id="abrir-form" aria-expanded="false" aria-controls="form-panel">
-        <span class="cta-icono">✨</span>
-        <span class="cta-texto">
-          <strong>Haz una pregunta</strong>
-          <em>Toca para escribir tu pregunta a los gatos</em>
-        </span>
-        <span class="cta-chevron" aria-hidden="true">›</span>
-      </button>
+    <section class="pregunta-card" aria-label="Modo de la ruleta">
+      <div class="opciones" id="opciones">
+        <p class="opciones-titulo">¿Cómo quieres girar?</p>
+        <button type="button" class="cta" id="abrir-form" aria-controls="form-panel">
+          <span class="cta-icono">✨</span>
+          <span class="cta-texto">
+            <strong>Haz una pregunta</strong>
+            <em>Pregunta algo y guarda la respuesta en el historial</em>
+          </span>
+          <span class="cta-chevron" aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="cta cta-libre" id="modo-libre">
+          <span class="cta-icono">🎲</span>
+          <span class="cta-texto">
+            <strong>Girar libremente</strong>
+            <em>Gira cuantas veces quieras, sin guardar</em>
+          </span>
+          <span class="cta-chevron" aria-hidden="true">›</span>
+        </button>
+      </div>
 
       <div class="form-panel" id="form-panel" hidden>
         <form id="pregunta-form" autocomplete="off">
@@ -52,13 +63,22 @@
         <button type="button" id="cambiar" class="btn-texto">Cambiar</button>
       </div>
 
+      <div class="pregunta-activa modo-libre-activo" id="libre-activo" hidden>
+        <div class="activa-info">
+          <span class="activa-meta">Modo</span>
+          <strong>🎲 Giro libre</strong>
+          <p>Gira las veces que quieras. Nada se guarda.</p>
+        </div>
+        <button type="button" id="salir-libre" class="btn-texto">Cambiar</button>
+      </div>
+
       <p id="estado" class="estado" aria-live="polite"></p>
     </section>
 
     <section class="ruleta-wrap" aria-label="Ruleta de gatos">
       <div class="pointer" aria-hidden="true"></div>
       <canvas id="ruleta"></canvas>
-      <button id="girar" class="girar-btn" type="button" aria-label="Girar la ruleta" disabled>Haz pregunta</button>
+      <button id="girar" class="girar-btn" type="button" aria-label="Girar la ruleta" disabled>Elige modo</button>
     </section>
 
     <section class="resultado" aria-live="polite">

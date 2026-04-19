@@ -20,7 +20,9 @@ const btn = document.getElementById("girar");
 const ganadorEl = document.getElementById("ganador");
 const listaEl = document.getElementById("lista-gatos");
 
+const opcionesPanel = document.getElementById("opciones");
 const ctaBtn = document.getElementById("abrir-form");
+const libreBtn = document.getElementById("modo-libre");
 const formPanel = document.getElementById("form-panel");
 const form = document.getElementById("pregunta-form");
 const autorInput = document.getElementById("autor");
@@ -30,6 +32,8 @@ const activaPanel = document.getElementById("pregunta-activa");
 const activaAutor = document.getElementById("activa-autor");
 const activaPregunta = document.getElementById("activa-pregunta");
 const cambiarBtn = document.getElementById("cambiar");
+const librePanel = document.getElementById("libre-activo");
+const salirLibreBtn = document.getElementById("salir-libre");
 const estadoEl = document.getElementById("estado");
 const historialLista = document.getElementById("historial-lista");
 const historialVacio = document.getElementById("historial-vacio");
@@ -39,6 +43,7 @@ let W = 600, H = 600, cx = 300, cy = 300, radius = 290;
 let rotation = 0;
 let spinning = false;
 let preguntaActiva = null;
+let modoLibre = false;
 
 /* ---------- Canvas & wheel ---------- */
 function setupCanvas() {
@@ -102,14 +107,14 @@ function actualizarGirar() {
     btn.disabled = true;
     btn.classList.remove("listo");
     btn.textContent = "Girando…";
-  } else if (preguntaActiva) {
+  } else if (preguntaActiva || modoLibre) {
     btn.disabled = false;
     btn.classList.add("listo");
     btn.textContent = "¡Girar!";
   } else {
     btn.disabled = true;
     btn.classList.remove("listo");
-    btn.textContent = "Haz pregunta";
+    btn.textContent = "Elige modo";
   }
 }
 
@@ -123,8 +128,8 @@ function shakePreguntaCard() {
 
 function spin() {
   if (spinning) return;
-  if (!preguntaActiva) {
-    setEstado("Primero escribe y confirma tu pregunta.", "error");
+  if (!preguntaActiva && !modoLibre) {
+    setEstado("Elige un modo para poder girar.", "error");
     shakePreguntaCard();
     return;
   }
@@ -183,34 +188,34 @@ function announceWinner(idx) {
       fecha: new Date().toISOString(),
     });
     preguntaActiva = null;
+    setEstado(`El gato respondió: ${gato}`, "ok");
+    setTimeout(resetEstadoInicial, 2500);
+  } else if (modoLibre) {
+    setEstado(`Salió: ${gato}. Puedes volver a girar.`, "ok");
   }
-  setEstado(`El gato respondió: ${gato}`, "ok");
-  setTimeout(resetEstadoInicial, 2500);
 }
 
 /* ---------- UI state ---------- */
-function mostrarCTA() {
-  ctaBtn.hidden = false;
-  ctaBtn.setAttribute("aria-expanded", "false");
-  formPanel.hidden = true;
-  activaPanel.hidden = true;
+function mostrarPanel(panelVisible) {
+  [opcionesPanel, formPanel, activaPanel, librePanel].forEach((p) => {
+    p.hidden = p !== panelVisible;
+  });
 }
 
+function mostrarOpciones() { mostrarPanel(opcionesPanel); }
+
 function mostrarForm() {
-  ctaBtn.hidden = true;
-  ctaBtn.setAttribute("aria-expanded", "true");
-  formPanel.hidden = false;
-  activaPanel.hidden = true;
+  mostrarPanel(formPanel);
   setTimeout(() => autorInput.focus(), 50);
 }
 
 function mostrarActiva() {
-  ctaBtn.hidden = true;
-  formPanel.hidden = true;
-  activaPanel.hidden = false;
+  mostrarPanel(activaPanel);
   activaAutor.textContent = preguntaActiva.autor;
   activaPregunta.textContent = `"${preguntaActiva.pregunta}"`;
 }
+
+function mostrarLibre() { mostrarPanel(librePanel); }
 
 function resetEstadoInicial() {
   autorInput.value = "";
@@ -218,8 +223,9 @@ function resetEstadoInicial() {
   autorInput.disabled = false;
   preguntaInput.disabled = false;
   preguntaActiva = null;
+  modoLibre = false;
   actualizarGirar();
-  mostrarCTA();
+  mostrarOpciones();
   setEstado("");
 }
 
@@ -232,6 +238,7 @@ function confirmarPregunta(e) {
     return;
   }
   preguntaActiva = { autor, pregunta };
+  modoLibre = false;
   autorInput.disabled = true;
   preguntaInput.disabled = true;
   actualizarGirar();
@@ -241,7 +248,7 @@ function confirmarPregunta(e) {
 }
 
 function cancelarForm() {
-  mostrarCTA();
+  mostrarOpciones();
   setEstado("");
 }
 
@@ -250,7 +257,23 @@ function cambiarPregunta() {
   autorInput.disabled = false;
   preguntaInput.disabled = false;
   actualizarGirar();
-  mostrarForm();
+  mostrarOpciones();
+  setEstado("");
+}
+
+function activarLibre() {
+  modoLibre = true;
+  preguntaActiva = null;
+  mostrarLibre();
+  actualizarGirar();
+  setEstado("Modo giro libre. ¡Gira cuando quieras!", "ok");
+  ganadorEl.textContent = "—";
+}
+
+function salirLibre() {
+  modoLibre = false;
+  mostrarOpciones();
+  actualizarGirar();
   setEstado("");
 }
 
@@ -337,9 +360,11 @@ function renderList() {
 
 /* ---------- Events ---------- */
 ctaBtn.addEventListener("click", mostrarForm);
+libreBtn.addEventListener("click", activarLibre);
 cancelarBtn.addEventListener("click", cancelarForm);
 form.addEventListener("submit", confirmarPregunta);
 cambiarBtn.addEventListener("click", cambiarPregunta);
+salirLibreBtn.addEventListener("click", salirLibre);
 
 btn.addEventListener("click", spin);
 
