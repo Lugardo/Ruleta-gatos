@@ -6,7 +6,7 @@
   <title>Ruleta de Gatos 🐱</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -16,32 +16,53 @@
       <p class="subtitle">Haz una pregunta y deja que el destino felino decida</p>
     </header>
 
-    <section class="pregunta-card" aria-label="Formulario de pregunta">
-      <form id="pregunta-form" class="pregunta-form" autocomplete="off">
-        <label class="campo">
-          <span>¿Quién pregunta?</span>
-          <input id="autor" name="autor" type="text" maxlength="60" required placeholder="Tu nombre" />
-        </label>
-        <label class="campo">
-          <span>¿Cuál es tu pregunta?</span>
-          <textarea id="pregunta" name="pregunta" rows="2" maxlength="240" required placeholder="Escribe tu pregunta para los gatos…"></textarea>
-        </label>
-        <div class="acciones">
-          <button type="submit" id="confirmar" class="btn-primario">Confirmar pregunta</button>
-          <button type="button" id="nueva" class="btn-secundario" hidden>Nueva pregunta</button>
+    <section class="pregunta-card" aria-label="Pregunta para los gatos">
+      <button type="button" class="cta" id="abrir-form" aria-expanded="false" aria-controls="form-panel">
+        <span class="cta-icono">✨</span>
+        <span class="cta-texto">
+          <strong>Haz una pregunta</strong>
+          <em>Toca para escribir tu pregunta a los gatos</em>
+        </span>
+        <span class="cta-chevron" aria-hidden="true">›</span>
+      </button>
+
+      <div class="form-panel" id="form-panel" hidden>
+        <form id="pregunta-form" autocomplete="off">
+          <label class="campo">
+            <span>¿Quién pregunta?</span>
+            <input id="autor" name="autor" type="text" maxlength="60" required placeholder="Tu nombre" />
+          </label>
+          <label class="campo">
+            <span>¿Cuál es tu pregunta?</span>
+            <textarea id="pregunta" name="pregunta" rows="3" maxlength="240" required placeholder="Ej. ¿Debería salir a caminar hoy?"></textarea>
+          </label>
+          <div class="acciones">
+            <button type="button" id="cancelar" class="btn-secundario">Cancelar</button>
+            <button type="submit" id="confirmar" class="btn-primario">Confirmar pregunta</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="pregunta-activa" id="pregunta-activa" hidden>
+        <div class="activa-info">
+          <span class="activa-meta">Preguntando</span>
+          <strong id="activa-autor"></strong>
+          <p id="activa-pregunta"></p>
         </div>
-        <p id="estado" class="estado" aria-live="polite"></p>
-      </form>
+        <button type="button" id="cambiar" class="btn-texto">Cambiar</button>
+      </div>
+
+      <p id="estado" class="estado" aria-live="polite"></p>
     </section>
 
     <section class="ruleta-wrap" aria-label="Ruleta de gatos">
       <div class="pointer" aria-hidden="true"></div>
-      <canvas id="ruleta" width="600" height="600"></canvas>
+      <canvas id="ruleta"></canvas>
       <button id="girar" class="girar-btn" aria-label="Girar la ruleta" disabled>¡Girar!</button>
     </section>
 
     <section class="resultado" aria-live="polite">
-      <p class="resultado-label">Ganador</p>
+      <p class="resultado-label">La respuesta del gato</p>
       <p id="ganador" class="resultado-nombre">—</p>
     </section>
 
@@ -53,7 +74,7 @@
     <section class="historial" aria-label="Historial de preguntas">
       <div class="historial-head">
         <h2>Historial</h2>
-        <button type="button" id="limpiar-historial" class="btn-texto">Borrar historial</button>
+        <button type="button" id="limpiar-historial" class="btn-texto peligro">Borrar todo</button>
       </div>
       <ol id="historial-lista" class="historial-lista"></ol>
       <p id="historial-vacio" class="historial-vacio">Aún no hay preguntas guardadas.</p>
