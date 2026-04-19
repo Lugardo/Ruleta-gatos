@@ -38,13 +38,7 @@ try {
     );
 } catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode([
-        'error'  => 'No se pudo conectar a la base de datos.',
-        'detail' => $e->getMessage(),
-        'host'   => $DB_HOST ?? null,
-        'name'   => $DB_NAME ?? null,
-        'user'   => $DB_USER ?? null,
-    ]);
+    echo json_encode(['error' => 'No se pudo conectar a la base de datos.']);
     exit;
 }
 
