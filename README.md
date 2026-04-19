@@ -1,6 +1,12 @@
 # Ruleta de Gatos 🐱
 
-Página web estática que muestra una ruleta giratoria con 19 gatos. Al pulsar el botón **¡Girar!** (o hacer clic sobre la ruleta) se selecciona uno al azar con una animación de desaceleración.
+Página web estática que muestra una ruleta giratoria con 19 gatos. El flujo es:
+
+1. Escribe **quién pregunta** y **la pregunta**.
+2. Pulsa **Confirmar pregunta** (los campos se bloquean y se habilita el giro).
+3. Gira la ruleta y un gato "responde" al azar.
+4. La pregunta, el autor y el gato ganador se guardan en un historial persistente (localStorage).
+5. Pulsa **Nueva pregunta** para empezar otra ronda, o **Borrar historial** para limpiarlo.
 
 ## Cómo usarla
 

@@ -18,6 +18,18 @@ const ctx = canvas.getContext("2d");
 const btn = document.getElementById("girar");
 const ganadorEl = document.getElementById("ganador");
 const listaEl = document.getElementById("lista-gatos");
+const form = document.getElementById("pregunta-form");
+const autorInput = document.getElementById("autor");
+const preguntaInput = document.getElementById("pregunta");
+const confirmarBtn = document.getElementById("confirmar");
+const nuevaBtn = document.getElementById("nueva");
+const estadoEl = document.getElementById("estado");
+const historialLista = document.getElementById("historial-lista");
+const historialVacio = document.getElementById("historial-vacio");
+const limpiarBtn = document.getElementById("limpiar-historial");
+
+const STORAGE_KEY = "ruleta-gatos.historial";
+let preguntaActiva = null;
 
 let W = 600, H = 600, cx = 300, cy = 300, radius = 290;
 let rotation = 0;
@@ -82,6 +94,10 @@ function easeOutCubic(t) {
 
 function spin() {
   if (spinning) return;
+  if (!preguntaActiva) {
+    setEstado("Primero confirma tu pregunta para poder girar.", "error");
+    return;
+  }
   spinning = true;
   btn.disabled = true;
   ganadorEl.textContent = "girando…";
@@ -115,7 +131,6 @@ function spin() {
     } else {
       rotation = finalRotation % (2 * Math.PI);
       spinning = false;
-      btn.disabled = false;
       announceWinner(targetIndex);
     }
   }
@@ -123,14 +138,126 @@ function spin() {
 }
 
 function announceWinner(idx) {
-  ganadorEl.textContent = gatos[idx];
+  const gato = gatos[idx];
+  ganadorEl.textContent = gato;
   document.querySelectorAll("#lista-gatos li").forEach((li, i) => {
     li.classList.toggle("ganador", i === idx);
   });
+  if (preguntaActiva) {
+    guardarEntrada({
+      autor: preguntaActiva.autor,
+      pregunta: preguntaActiva.pregunta,
+      gato,
+      fecha: new Date().toISOString(),
+    });
+    preguntaActiva = null;
+  }
+  nuevaBtn.hidden = false;
+  setEstado(`El gato respondió: ${gato}`, "ok");
 }
 
 function renderList() {
   listaEl.innerHTML = gatos.map((g) => `<li>${g}</li>`).join("");
+}
+
+function setEstado(msg, tipo) {
+  estadoEl.textContent = msg || "";
+  estadoEl.classList.remove("ok", "error");
+  if (tipo) estadoEl.classList.add(tipo);
+}
+
+function leerHistorial() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function escribirHistorial(lista) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
+  } catch {
+    /* almacenamiento no disponible */
+  }
+}
+
+function guardarEntrada(entrada) {
+  const lista = leerHistorial();
+  lista.unshift(entrada);
+  escribirHistorial(lista.slice(0, 100));
+  renderHistorial();
+}
+
+function escapar(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
+function formatearFecha(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString("es-MX", {
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function renderHistorial() {
+  const lista = leerHistorial();
+  historialLista.innerHTML = lista.map((e) => `
+    <li class="historial-item">
+      <div class="meta">${escapar(e.autor)} · ${formatearFecha(e.fecha)}</div>
+      <p class="preg">“${escapar(e.pregunta)}”</p>
+      <p class="resp">🐱 ${escapar(e.gato)}</p>
+    </li>
+  `).join("");
+  historialVacio.hidden = lista.length > 0;
+}
+
+function confirmarPregunta(e) {
+  e.preventDefault();
+  const autor = autorInput.value.trim();
+  const pregunta = preguntaInput.value.trim();
+  if (!autor || !pregunta) {
+    setEstado("Completa tu nombre y tu pregunta.", "error");
+    return;
+  }
+  preguntaActiva = { autor, pregunta };
+  autorInput.disabled = true;
+  preguntaInput.disabled = true;
+  confirmarBtn.disabled = true;
+  nuevaBtn.hidden = false;
+  btn.disabled = false;
+  setEstado("Pregunta confirmada. ¡Gira la ruleta!", "ok");
+}
+
+function nuevaPregunta() {
+  preguntaActiva = null;
+  autorInput.disabled = false;
+  preguntaInput.disabled = false;
+  confirmarBtn.disabled = false;
+  autorInput.value = "";
+  preguntaInput.value = "";
+  nuevaBtn.hidden = true;
+  btn.disabled = true;
+  ganadorEl.textContent = "—";
+  document.querySelectorAll("#lista-gatos li").forEach((li) => {
+    li.classList.remove("ganador");
+  });
+  setEstado("");
+  autorInput.focus();
+}
+
+function limpiarHistorial() {
+  if (!confirm("¿Borrar todo el historial de preguntas?")) return;
+  escribirHistorial([]);
+  renderHistorial();
 }
 
 btn.addEventListener("click", spin);
@@ -141,7 +268,11 @@ btn.addEventListener("keydown", (e) => {
     spin();
   }
 });
+form.addEventListener("submit", confirmarPregunta);
+nuevaBtn.addEventListener("click", nuevaPregunta);
+limpiarBtn.addEventListener("click", limpiarHistorial);
 window.addEventListener("resize", setupCanvas);
 
 renderList();
+renderHistorial();
 setupCanvas();
