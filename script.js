@@ -97,16 +97,39 @@ function drawWheel() {
 function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
 /* ---------- Spin ---------- */
+function actualizarGirar() {
+  if (spinning) {
+    btn.disabled = true;
+    btn.classList.remove("listo");
+    btn.textContent = "Girando…";
+  } else if (preguntaActiva) {
+    btn.disabled = false;
+    btn.classList.add("listo");
+    btn.textContent = "¡Girar!";
+  } else {
+    btn.disabled = true;
+    btn.classList.remove("listo");
+    btn.textContent = "Haz pregunta";
+  }
+}
+
+function shakePreguntaCard() {
+  const card = document.querySelector(".pregunta-card");
+  if (!card) return;
+  card.classList.remove("shake");
+  void card.offsetWidth;
+  card.classList.add("shake");
+}
+
 function spin() {
   if (spinning) return;
   if (!preguntaActiva) {
-    setEstado("Primero confirma tu pregunta para poder girar.", "error");
+    setEstado("Primero escribe y confirma tu pregunta.", "error");
+    shakePreguntaCard();
     return;
   }
   spinning = true;
-  btn.disabled = true;
-  btn.classList.remove("listo");
-  btn.textContent = "girando…";
+  actualizarGirar();
   ganadorEl.textContent = "…";
   document.querySelectorAll("#lista-gatos li").forEach((li) => {
     li.classList.remove("ganador");
@@ -138,8 +161,8 @@ function spin() {
     } else {
       rotation = finalRotation % (2 * Math.PI);
       spinning = false;
-      btn.textContent = "¡Girar!";
       announceWinner(targetIndex);
+      actualizarGirar();
     }
   }
   requestAnimationFrame(frame);
@@ -194,8 +217,8 @@ function resetEstadoInicial() {
   preguntaInput.value = "";
   autorInput.disabled = false;
   preguntaInput.disabled = false;
-  btn.disabled = true;
-  btn.classList.remove("listo");
+  preguntaActiva = null;
+  actualizarGirar();
   mostrarCTA();
   setEstado("");
 }
@@ -211,8 +234,7 @@ function confirmarPregunta(e) {
   preguntaActiva = { autor, pregunta };
   autorInput.disabled = true;
   preguntaInput.disabled = true;
-  btn.disabled = false;
-  btn.classList.add("listo");
+  actualizarGirar();
   mostrarActiva();
   setEstado("Pregunta confirmada. ¡Gira la ruleta!", "ok");
   ganadorEl.textContent = "—";
@@ -225,10 +247,9 @@ function cancelarForm() {
 
 function cambiarPregunta() {
   preguntaActiva = null;
-  btn.disabled = true;
-  btn.classList.remove("listo");
   autorInput.disabled = false;
   preguntaInput.disabled = false;
+  actualizarGirar();
   mostrarForm();
   setEstado("");
 }
@@ -336,3 +357,4 @@ window.addEventListener("resize", setupCanvas);
 renderList();
 renderHistorial();
 setupCanvas();
+actualizarGirar();
