@@ -4,9 +4,6 @@
   RewriteRule ^api/historial(/.*)?$ api.php [L,QSA]
 </IfModule>
 
-# Fuerza la carga del PHP más reciente (Hostinger permite elegir 7.4 – 8.3).
-AddType application/x-httpd-php .php
-
 # Bloquea acceso directo a archivos sensibles.
 <FilesMatch "^(config\.php|server\.py|\.gitignore|README\.md|ruleta\.db)$">
   Require all denied
