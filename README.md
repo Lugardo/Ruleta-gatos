@@ -21,7 +21,20 @@ python3 server.py
 
 Si venías de una versión anterior con `historial.json`, al arrancar el servidor se migra automáticamente a la DB y el archivo original se renombra a `historial.json.migrated`.
 
-### Opción B — modo local (historial por navegador)
+### Opción B — Hostinger (u otro hosting PHP+MySQL)
+
+Ideal para que **todo el mundo vea el mismo historial desde cualquier dispositivo** sin tener que mantener una máquina encendida.
+
+1. En el hPanel de Hostinger crea una **base de datos MySQL**: `hPanel > Bases de datos > MySQL`. Anota host, nombre de la DB, usuario y contraseña.
+2. Copia `config.example.php` a `config.php` y rellena esos 4 valores.
+3. Sube por File Manager o FTP a `public_html/` los archivos:
+   - `index.html`, `styles.css`, `script.js`
+   - `api.php`, `config.php`, `.htaccess`
+4. Entra a tu dominio — la tabla `historial` se crea sola la primera vez que alguien carga la página.
+
+**No subas** `config.php` a git ni a repos públicos (ya está en `.gitignore`). Tampoco subas `server.py` ni `ruleta.db` — esos son solo para desarrollo local.
+
+### Opción C — modo local sin backend (historial por navegador)
 
 Abre `index.html` directamente, o sírvelo con un static server cualquiera (`python3 -m http.server 8000`). Sin backend, el historial se guarda solo en `localStorage` del navegador.
 
@@ -38,8 +51,11 @@ La UI indica en qué modo estás con un badge junto a "Historial":
 - `index.html` — estructura de la página.
 - `styles.css` — estilos y layout responsive.
 - `script.js` — array de gatos, dibujo de la ruleta y lógica de giro.
-- `server.py` — servidor estático + API `/api/historial` (opcional).
-- `ruleta.db` — base de datos SQLite con la tabla `historial` (creada en runtime, ignorada por git).
+- `server.py` — servidor estático + API `/api/historial` para desarrollo local (SQLite).
+- `ruleta.db` — base de datos SQLite local (creada en runtime, ignorada por git).
+- `api.php` — mismo API pero para hosting compartido con PHP + MySQL (Hostinger, etc.).
+- `config.example.php` — plantilla de credenciales MySQL; copiar a `config.php`.
+- `.htaccess` — rutea `/api/historial` a `api.php` y fija cache-control.
 
 ### Esquema de la DB
 ```sql

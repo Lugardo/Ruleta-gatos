@@ -307,7 +307,7 @@ async function fetchJson(url, opts) {
 
 async function detectarServidor() {
   try {
-    await fetchJson("/api/historial");
+    await fetchJson("api/historial");
     usingServer = true;
   } catch {
     usingServer = false;
@@ -325,7 +325,7 @@ function actualizarIndicadorAlmacen() {
 
 async function obtenerHistorial() {
   if (usingServer) {
-    try { return await fetchJson("/api/historial"); }
+    try { return await fetchJson("api/historial"); }
     catch { usingServer = false; actualizarIndicadorAlmacen(); }
   }
   return leerLocal();
@@ -334,7 +334,7 @@ async function obtenerHistorial() {
 async function guardarEntrada(entrada) {
   if (usingServer) {
     try {
-      await fetchJson("/api/historial", {
+      await fetchJson("api/historial", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(entrada),
@@ -355,7 +355,7 @@ async function guardarEntrada(entrada) {
 async function borrarEntrada(id) {
   if (usingServer) {
     try {
-      await fetch(`/api/historial/${encodeURIComponent(id)}`, { method: "DELETE" });
+      await fetch(`api/historial/${encodeURIComponent(id)}`, { method: "DELETE" });
     } catch {
       usingServer = false;
       actualizarIndicadorAlmacen();
@@ -374,7 +374,7 @@ async function limpiarHistorial() {
   if (!confirm(`¿Borrar las ${lista.length} preguntas del historial? Esta acción no se puede deshacer.`)) return;
   if (usingServer) {
     try {
-      await fetch("/api/historial", { method: "DELETE" });
+      await fetch("api/historial", { method: "DELETE" });
     } catch {
       usingServer = false;
       actualizarIndicadorAlmacen();

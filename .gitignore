@@ -4,6 +4,7 @@ ruleta.db-wal
 ruleta.db-shm
 historial.json
 historial.json.migrated
+config.php
 __pycache__/
 *.pyc
 .DS_Store

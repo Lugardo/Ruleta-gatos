@@ -1,0 +1,23 @@
+# Rutea /api/historial y /api/historial/ID al backend PHP.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^api/historial(/.*)?$ api.php [L,QSA]
+</IfModule>
+
+# Fuerza la carga del PHP más reciente (Hostinger permite elegir 7.4 – 8.3).
+AddType application/x-httpd-php .php
+
+# Bloquea acceso directo a archivos sensibles.
+<FilesMatch "^(config\.php|server\.py|\.gitignore|README\.md|ruleta\.db)$">
+  Require all denied
+</FilesMatch>
+
+# Cache control: HTML no se cachea, estáticos sí (un día).
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
