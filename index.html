@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ruleta de Gatos 🐱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>🐱 Ruleta de Gatos</h1>
+      <p class="subtitle">Pulsa el botón y deja que el destino felino decida</p>
+    </header>
+
+    <section class="ruleta-wrap" aria-label="Ruleta de gatos">
+      <div class="pointer" aria-hidden="true"></div>
+      <canvas id="ruleta" width="600" height="600"></canvas>
+      <button id="girar" class="girar-btn" aria-label="Girar la ruleta">¡Girar!</button>
+    </section>
+
+    <section class="resultado" aria-live="polite">
+      <p class="resultado-label">Ganador</p>
+      <p id="ganador" class="resultado-nombre">—</p>
+    </section>
+
+    <aside class="lista">
+      <h2>Gatos participantes</h2>
+      <ul id="lista-gatos"></ul>
+    </aside>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
