@@ -36,3 +36,11 @@ Dexter, Marty, Lilo, Lulú, Eddy, Bell, Turoc, Lana, Yeyuni, Catalino, Héctor, 
 
 ## Personalización
 Edita el array `gatos` en `script.js` para añadir, quitar o renombrar participantes — la ruleta se redibuja automáticamente con el número de sectores que tenga el array.
+
+## Cache-busting
+Los navegadores cachean `styles.css` y `script.js` de forma agresiva. Para que los usuarios reciban siempre la última versión:
+
+1. Meta tags en `index.html` fuerzan `no-cache` para el propio HTML.
+2. Los assets se cargan con un sufijo `?v=YYYY-MM-DD-N` (ej. `styles.css?v=2026-04-19-1`).
+
+**Cada vez que modifiques `styles.css` o `script.js`, incrementa el sufijo `?v=` en `index.html`.** Si en un mismo día haces varios cambios, sube el contador final (`-1`, `-2`, `-3`…). Busca en el HTML el comentario `Cache-busting:` para encontrarlo rápido.
