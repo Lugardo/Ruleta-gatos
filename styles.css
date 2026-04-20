@@ -18,6 +18,7 @@
 * { box-sizing: border-box; }
 
 html, body { margin: 0; padding: 0; min-height: 100%; }
+html { overflow-x: hidden; }
 
 body {
   font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -30,6 +31,7 @@ body {
   justify-content: center;
   padding: 32px 16px 80px;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 .app {
@@ -293,7 +295,8 @@ body {
 /* Ruleta */
 .ruleta-wrap {
   position: relative;
-  width: min(92vw, 500px);
+  width: 100%;
+  max-width: 500px;
   aspect-ratio: 1 / 1;
   margin: 4px auto 0;
 }
