@@ -18,7 +18,44 @@ const canvas = document.getElementById("ruleta");
 const ctx = canvas.getContext("2d");
 const btn = document.getElementById("girar");
 const ganadorEl = document.getElementById("ganador");
+const ganadorFoto = document.getElementById("ganador-foto");
 const listaEl = document.getElementById("lista-gatos");
+
+const IMG_DIR = "imggatos/";
+const IMG_EXTS = ["jpg", "jpeg", "png", "webp"];
+
+function nombreArchivoGato(nombre) {
+  return nombre
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "");
+}
+
+function mostrarFotoGato(nombre) {
+  const base = nombreArchivoGato(nombre);
+  let intento = 0;
+  ganadorFoto.alt = `Foto de ${nombre}`;
+  ganadorFoto.hidden = true;
+  ganadorFoto.onerror = () => {
+    intento += 1;
+    if (intento < IMG_EXTS.length) {
+      ganadorFoto.src = `${IMG_DIR}${base}.${IMG_EXTS[intento]}`;
+    } else {
+      ganadorFoto.hidden = true;
+      ganadorFoto.onerror = null;
+    }
+  };
+  ganadorFoto.onload = () => { ganadorFoto.hidden = false; };
+  ganadorFoto.src = `${IMG_DIR}${base}.${IMG_EXTS[0]}`;
+}
+
+function ocultarFotoGato() {
+  ganadorFoto.onerror = null;
+  ganadorFoto.onload = null;
+  ganadorFoto.removeAttribute("src");
+  ganadorFoto.hidden = true;
+}
 
 const opcionesPanel = document.getElementById("opciones");
 const ctaBtn = document.getElementById("abrir-form");
@@ -136,6 +173,7 @@ function spin() {
   spinning = true;
   actualizarGirar();
   ganadorEl.textContent = "…";
+  ocultarFotoGato();
   document.querySelectorAll("#lista-gatos li").forEach((li) => {
     li.classList.remove("ganador");
   });
@@ -176,6 +214,7 @@ function spin() {
 function announceWinner(idx) {
   const gato = gatos[idx];
   ganadorEl.textContent = gato;
+  mostrarFotoGato(gato);
   document.querySelectorAll("#lista-gatos li").forEach((li, i) => {
     li.classList.toggle("ganador", i === idx);
   });
@@ -226,6 +265,8 @@ function resetEstadoInicial() {
   modoLibre = false;
   actualizarGirar();
   mostrarOpciones();
+  ocultarFotoGato();
+  ganadorEl.textContent = "—";
   setEstado("");
 }
 
@@ -245,6 +286,7 @@ function confirmarPregunta(e) {
   mostrarActiva();
   setEstado("Pregunta confirmada. ¡Gira la ruleta!", "ok");
   ganadorEl.textContent = "—";
+  ocultarFotoGato();
 }
 
 function cancelarForm() {
@@ -268,6 +310,7 @@ function activarLibre() {
   actualizarGirar();
   setEstado("Modo giro libre. ¡Gira cuando quieras!", "ok");
   ganadorEl.textContent = "—";
+  ocultarFotoGato();
 }
 
 function salirLibre() {
