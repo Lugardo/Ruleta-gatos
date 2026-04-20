@@ -91,6 +91,7 @@ const libreBtn = document.getElementById("modo-libre");
 const formPanel = document.getElementById("form-panel");
 const form = document.getElementById("pregunta-form");
 const autorInput = document.getElementById("autor");
+const autorRadios = document.querySelectorAll('input[name="autor-radio"]');
 const preguntaInput = document.getElementById("pregunta");
 const cancelarBtn = document.getElementById("cancelar");
 const activaPanel = document.getElementById("pregunta-activa");
@@ -273,7 +274,10 @@ function mostrarOpciones() { mostrarPanel(opcionesPanel); }
 
 function mostrarForm() {
   mostrarPanel(formPanel);
-  setTimeout(() => autorInput.focus(), 50);
+  setTimeout(() => {
+    const primerRadio = autorRadios[0];
+    if (primerRadio) primerRadio.focus();
+  }, 50);
 }
 
 function mostrarActiva() {
@@ -285,10 +289,9 @@ function mostrarActiva() {
 function mostrarLibre() { mostrarPanel(librePanel); }
 
 function resetEstadoInicial() {
-  autorInput.value = "";
   preguntaInput.value = "";
-  autorInput.disabled = false;
   preguntaInput.disabled = false;
+  resetearAutor();
   preguntaActiva = null;
   modoLibre = false;
   actualizarGirar();
@@ -297,16 +300,43 @@ function resetEstadoInicial() {
   setEstado("");
 }
 
+function autorSeleccionado() {
+  const checked = Array.from(autorRadios).find((r) => r.checked);
+  if (!checked) return "";
+  if (checked.value === "otro") return autorInput.value.trim();
+  return checked.value;
+}
+
+function manejarCambioAutor(e) {
+  const r = e.target;
+  if (!r.checked) return;
+  if (r.value === "otro") {
+    autorInput.hidden = false;
+    setTimeout(() => autorInput.focus(), 50);
+  } else {
+    autorInput.hidden = true;
+    autorInput.value = "";
+  }
+}
+
+function resetearAutor() {
+  autorRadios.forEach((r) => { r.checked = false; r.disabled = false; });
+  autorInput.hidden = true;
+  autorInput.value = "";
+  autorInput.disabled = false;
+}
+
 function confirmarPregunta(e) {
   e.preventDefault();
-  const autor = autorInput.value.trim();
+  const autor = autorSeleccionado();
   const pregunta = preguntaInput.value.trim();
   if (!autor || !pregunta) {
-    setEstado("Completa tu nombre y tu pregunta.", "error");
+    setEstado("Elige quién pregunta y escribe tu pregunta.", "error");
     return;
   }
   preguntaActiva = { autor, pregunta };
   modoLibre = false;
+  autorRadios.forEach((r) => { r.disabled = true; });
   autorInput.disabled = true;
   preguntaInput.disabled = true;
   actualizarGirar();
@@ -322,7 +352,7 @@ function cancelarForm() {
 
 function cambiarPregunta() {
   preguntaActiva = null;
-  autorInput.disabled = false;
+  resetearAutor();
   preguntaInput.disabled = false;
   actualizarGirar();
   mostrarOpciones();
@@ -500,6 +530,7 @@ ctaBtn.addEventListener("click", mostrarForm);
 libreBtn.addEventListener("click", activarLibre);
 cancelarBtn.addEventListener("click", cancelarForm);
 form.addEventListener("submit", confirmarPregunta);
+autorRadios.forEach((r) => r.addEventListener("change", manejarCambioAutor));
 cambiarBtn.addEventListener("click", cambiarPregunta);
 salirLibreBtn.addEventListener("click", salirLibre);
 

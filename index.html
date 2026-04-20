@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Cache-busting: bump ASSET_VERSION al modificar styles.css o script.js -->
-  <link rel="stylesheet" href="styles.css?v=2026-04-19-6" />
+  <link rel="stylesheet" href="styles.css?v=2026-04-19-7" />
 </head>
 <body>
   <main class="app">
@@ -43,10 +43,24 @@
 
       <div class="form-panel" id="form-panel" hidden>
         <form id="pregunta-form" autocomplete="off">
-          <label class="campo">
-            <span>¿Quién pregunta?</span>
-            <input id="autor" name="autor" type="text" maxlength="60" required placeholder="Tu nombre" />
-          </label>
+          <fieldset class="campo autor-campo">
+            <legend>¿Quién pregunta?</legend>
+            <div class="autor-opciones">
+              <label class="autor-chip">
+                <input type="radio" name="autor-radio" value="Paulette" />
+                <span>Paulette</span>
+              </label>
+              <label class="autor-chip">
+                <input type="radio" name="autor-radio" value="Lugardo" />
+                <span>Lugardo</span>
+              </label>
+              <label class="autor-chip">
+                <input type="radio" name="autor-radio" value="otro" />
+                <span>Otro</span>
+              </label>
+            </div>
+            <input id="autor" name="autor" type="text" maxlength="60" placeholder="Escribe tu nombre" hidden />
+          </fieldset>
           <label class="campo">
             <span>¿Cuál es tu pregunta?</span>
             <textarea id="pregunta" name="pregunta" rows="3" maxlength="240" required placeholder="Ej. ¿Debería salir a caminar hoy?"></textarea>
@@ -117,6 +131,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=2026-04-19-6"></script>
+  <script src="script.js?v=2026-04-19-7"></script>
 </body>
 </html>
