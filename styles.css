@@ -481,17 +481,40 @@ body {
   gap: 6px;
 }
 .lista li {
+  padding: 0;
+  background: transparent;
+}
+.lista .gato-item {
+  display: block;
+  width: 100%;
   padding: 7px 12px;
   border-radius: 10px;
-  font-size: 0.95rem;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  border: none;
   background: #fafaff;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
-.lista li.ganador {
+.lista .gato-item:hover {
+  background: var(--accent-soft);
+  transform: translateY(-1px);
+}
+.lista .gato-item:focus-visible {
+  outline: 3px solid rgba(255, 111, 163, 0.45);
+  outline-offset: 2px;
+}
+.lista li.ganador .gato-item {
   background: var(--accent);
   color: #fff;
   font-weight: 600;
   transform: scale(1.04);
+}
+.lista li.ganador .gato-item:hover {
+  background: var(--accent-dark);
+  transform: scale(1.04) translateY(-1px);
 }
 
 /* Historial */

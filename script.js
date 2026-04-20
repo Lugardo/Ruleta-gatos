@@ -57,6 +57,7 @@ function cargarFoto(img, nombre) {
 }
 
 function abrirPopup(gato, meta) {
+  popupEsResultado = true;
   popupNombre.textContent = gato;
   if (meta) {
     popupMeta.textContent = meta;
@@ -71,6 +72,17 @@ function abrirPopup(gato, meta) {
   setTimeout(() => popupOkBtn.focus(), 50);
 }
 
+function abrirPopupPreview(gato) {
+  popupEsResultado = false;
+  popupNombre.textContent = gato;
+  popupMeta.textContent = "";
+  popupMeta.hidden = true;
+  cargarFoto(popupFoto, gato);
+  popupOverlay.hidden = false;
+  popupOverlay.setAttribute("aria-hidden", "false");
+  setTimeout(() => popupOkBtn.focus(), 50);
+}
+
 function cerrarPopup() {
   if (popupOverlay.hidden) return;
   popupOverlay.hidden = true;
@@ -78,11 +90,12 @@ function cerrarPopup() {
   popupFoto.onerror = null;
   popupFoto.onload = null;
   popupFoto.removeAttribute("src");
-  if (!modoLibre && !preguntaActiva) {
+  if (popupEsResultado && !modoLibre && !preguntaActiva) {
     resetEstadoInicial();
   } else {
     btn.focus();
   }
+  popupEsResultado = false;
 }
 
 const opcionesPanel = document.getElementById("opciones");
@@ -110,6 +123,7 @@ let rotation = 0;
 let spinning = false;
 let preguntaActiva = null;
 let modoLibre = false;
+let popupEsResultado = false;
 
 /* ---------- Canvas & wheel ---------- */
 function setupCanvas() {
@@ -522,7 +536,9 @@ async function renderHistorial() {
 }
 
 function renderList() {
-  listaEl.innerHTML = gatos.map((g) => `<li>${escapar(g)}</li>`).join("");
+  listaEl.innerHTML = gatos
+    .map((g) => `<li><button type="button" class="gato-item" data-gato="${escapar(g)}">${escapar(g)}</button></li>`)
+    .join("");
 }
 
 /* ---------- Events ---------- */
@@ -545,6 +561,12 @@ historialLista.addEventListener("click", (e) => {
 });
 
 limpiarBtn.addEventListener("click", limpiarHistorial);
+
+listaEl.addEventListener("click", (e) => {
+  const el = e.target.closest(".gato-item");
+  if (!el) return;
+  abrirPopupPreview(el.dataset.gato);
+});
 
 popupCerrarBtn.addEventListener("click", cerrarPopup);
 popupOkBtn.addEventListener("click", cerrarPopup);
