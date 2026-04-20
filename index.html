@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Cache-busting: bump ASSET_VERSION al modificar styles.css o script.js -->
-  <link rel="stylesheet" href="styles.css?v=2026-04-19-4" />
+  <link rel="stylesheet" href="styles.css?v=2026-04-19-5" />
 </head>
 <body>
   <main class="app">
@@ -86,8 +86,7 @@
     </section>
 
     <section class="resultado" aria-live="polite">
-      <p class="resultado-label">La respuesta del gato</p>
-      <img id="ganador-foto" class="resultado-foto" alt="" hidden />
+      <p class="resultado-label">Último gato</p>
       <p id="ganador" class="resultado-nombre">—</p>
     </section>
 
@@ -107,6 +106,17 @@
     </section>
   </main>
 
-  <script src="script.js?v=2026-04-19-4"></script>
+  <div id="popup-overlay" class="popup-overlay" hidden aria-hidden="true">
+    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popup-titulo">
+      <button type="button" class="popup-cerrar" id="popup-cerrar" aria-label="Cerrar">×</button>
+      <p class="popup-label">La respuesta del gato</p>
+      <img id="popup-foto" class="popup-foto" alt="" />
+      <h2 id="popup-titulo" class="popup-nombre">—</h2>
+      <p id="popup-meta" class="popup-meta" hidden></p>
+      <button type="button" class="btn-primario popup-ok" id="popup-ok">Continuar</button>
+    </div>
+  </div>
+
+  <script src="script.js?v=2026-04-19-5"></script>
 </body>
 </html>

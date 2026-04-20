@@ -18,8 +18,14 @@ const canvas = document.getElementById("ruleta");
 const ctx = canvas.getContext("2d");
 const btn = document.getElementById("girar");
 const ganadorEl = document.getElementById("ganador");
-const ganadorFoto = document.getElementById("ganador-foto");
 const listaEl = document.getElementById("lista-gatos");
+
+const popupOverlay = document.getElementById("popup-overlay");
+const popupFoto = document.getElementById("popup-foto");
+const popupNombre = document.getElementById("popup-titulo");
+const popupMeta = document.getElementById("popup-meta");
+const popupCerrarBtn = document.getElementById("popup-cerrar");
+const popupOkBtn = document.getElementById("popup-ok");
 
 const IMG_DIR = "imggatos/";
 const IMG_EXTS = ["jpg", "jpeg", "png", "webp"];
@@ -32,29 +38,51 @@ function nombreArchivoGato(nombre) {
     .replace(/\s+/g, "");
 }
 
-function mostrarFotoGato(nombre) {
+function cargarFoto(img, nombre) {
   const base = nombreArchivoGato(nombre);
   let intento = 0;
-  ganadorFoto.alt = `Foto de ${nombre}`;
-  ganadorFoto.hidden = true;
-  ganadorFoto.onerror = () => {
+  img.alt = `Foto de ${nombre}`;
+  img.hidden = true;
+  img.onerror = () => {
     intento += 1;
     if (intento < IMG_EXTS.length) {
-      ganadorFoto.src = `${IMG_DIR}${base}.${IMG_EXTS[intento]}`;
+      img.src = `${IMG_DIR}${base}.${IMG_EXTS[intento]}`;
     } else {
-      ganadorFoto.hidden = true;
-      ganadorFoto.onerror = null;
+      img.onerror = null;
+      img.hidden = true;
     }
   };
-  ganadorFoto.onload = () => { ganadorFoto.hidden = false; };
-  ganadorFoto.src = `${IMG_DIR}${base}.${IMG_EXTS[0]}`;
+  img.onload = () => { img.hidden = false; };
+  img.src = `${IMG_DIR}${base}.${IMG_EXTS[0]}`;
 }
 
-function ocultarFotoGato() {
-  ganadorFoto.onerror = null;
-  ganadorFoto.onload = null;
-  ganadorFoto.removeAttribute("src");
-  ganadorFoto.hidden = true;
+function abrirPopup(gato, meta) {
+  popupNombre.textContent = gato;
+  if (meta) {
+    popupMeta.textContent = meta;
+    popupMeta.hidden = false;
+  } else {
+    popupMeta.textContent = "";
+    popupMeta.hidden = true;
+  }
+  cargarFoto(popupFoto, gato);
+  popupOverlay.hidden = false;
+  popupOverlay.setAttribute("aria-hidden", "false");
+  setTimeout(() => popupOkBtn.focus(), 50);
+}
+
+function cerrarPopup() {
+  if (popupOverlay.hidden) return;
+  popupOverlay.hidden = true;
+  popupOverlay.setAttribute("aria-hidden", "true");
+  popupFoto.onerror = null;
+  popupFoto.onload = null;
+  popupFoto.removeAttribute("src");
+  if (!modoLibre && !preguntaActiva) {
+    resetEstadoInicial();
+  } else {
+    btn.focus();
+  }
 }
 
 const opcionesPanel = document.getElementById("opciones");
@@ -173,7 +201,6 @@ function spin() {
   spinning = true;
   actualizarGirar();
   ganadorEl.textContent = "…";
-  ocultarFotoGato();
   document.querySelectorAll("#lista-gatos li").forEach((li) => {
     li.classList.remove("ganador");
   });
@@ -214,11 +241,12 @@ function spin() {
 function announceWinner(idx) {
   const gato = gatos[idx];
   ganadorEl.textContent = gato;
-  mostrarFotoGato(gato);
   document.querySelectorAll("#lista-gatos li").forEach((li, i) => {
     li.classList.toggle("ganador", i === idx);
   });
+  let meta = null;
   if (preguntaActiva) {
+    meta = `${preguntaActiva.autor} preguntó: "${preguntaActiva.pregunta}"`;
     guardarEntrada({
       id: Date.now() + "-" + Math.random().toString(36).slice(2, 8),
       autor: preguntaActiva.autor,
@@ -228,10 +256,10 @@ function announceWinner(idx) {
     });
     preguntaActiva = null;
     setEstado(`El gato respondió: ${gato}`, "ok");
-    setTimeout(resetEstadoInicial, 2500);
   } else if (modoLibre) {
     setEstado(`Salió: ${gato}. Puedes volver a girar.`, "ok");
   }
+  abrirPopup(gato, meta);
 }
 
 /* ---------- UI state ---------- */
@@ -265,7 +293,6 @@ function resetEstadoInicial() {
   modoLibre = false;
   actualizarGirar();
   mostrarOpciones();
-  ocultarFotoGato();
   ganadorEl.textContent = "—";
   setEstado("");
 }
@@ -286,7 +313,6 @@ function confirmarPregunta(e) {
   mostrarActiva();
   setEstado("Pregunta confirmada. ¡Gira la ruleta!", "ok");
   ganadorEl.textContent = "—";
-  ocultarFotoGato();
 }
 
 function cancelarForm() {
@@ -310,7 +336,6 @@ function activarLibre() {
   actualizarGirar();
   setEstado("Modo giro libre. ¡Gira cuando quieras!", "ok");
   ganadorEl.textContent = "—";
-  ocultarFotoGato();
 }
 
 function salirLibre() {
@@ -489,6 +514,16 @@ historialLista.addEventListener("click", (e) => {
 });
 
 limpiarBtn.addEventListener("click", limpiarHistorial);
+
+popupCerrarBtn.addEventListener("click", cerrarPopup);
+popupOkBtn.addEventListener("click", cerrarPopup);
+popupOverlay.addEventListener("click", (e) => {
+  if (e.target === popupOverlay) cerrarPopup();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !popupOverlay.hidden) cerrarPopup();
+});
+
 window.addEventListener("resize", setupCanvas);
 
 renderList();
