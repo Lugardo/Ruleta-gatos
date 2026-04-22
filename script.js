@@ -28,7 +28,7 @@ const popupCerrarBtn = document.getElementById("popup-cerrar");
 const popupOkBtn = document.getElementById("popup-ok");
 
 const IMG_DIR = "imggatos/";
-const IMG_EXTS = ["jpg", "jpeg", "png", "webp"];
+const IMG_EXTS = ["jpeg", "jpg", "png", "webp"];
 
 function nombreArchivoGato(nombre) {
   return nombre
