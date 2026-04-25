@@ -464,13 +464,48 @@ body {
 
 /* Lista */
 .lista { padding: 20px 24px; max-width: 620px; }
-.lista h2 {
-  margin: 0 0 12px;
+.lista-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.lista-head h2 {
+  margin: 0;
   font-size: 1rem;
   color: var(--ink-soft);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+.orden-toggle {
+  display: inline-flex;
+  background: #fafaff;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+.orden-btn {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.orden-btn:hover { color: var(--ink); }
+.orden-btn.activo {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(215, 58, 110, 0.25);
 }
 .lista ul {
   list-style: none;

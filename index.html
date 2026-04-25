@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <!-- Cache-busting: bump ASSET_VERSION al modificar styles.css o script.js -->
-  <link rel="stylesheet" href="styles.css?v=2026-04-19-13" />
+  <link rel="stylesheet" href="styles.css?v=2026-04-19-14" />
 </head>
 <body>
   <main class="app">
@@ -113,7 +113,13 @@
     </section>
 
     <aside class="lista">
-      <h2>Gatos participantes</h2>
+      <div class="lista-head">
+        <h2>Gatos participantes</h2>
+        <div class="orden-toggle" role="group" aria-label="Ordenar gatos">
+          <button type="button" class="orden-btn activo" data-orden="alfabetico">A-Z</button>
+          <button type="button" class="orden-btn" data-orden="frecuencia">Más sorteados</button>
+        </div>
+      </div>
       <ul id="lista-gatos"></ul>
     </aside>
 
@@ -144,6 +150,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=2026-04-19-13"></script>
+  <script src="script.js?v=2026-04-19-14"></script>
 </body>
 </html>

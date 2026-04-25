@@ -1,7 +1,7 @@
 const gatos = [
   "Dexter", "Marty", "Lilo", "Lulú", "Eddy",
-  "Bell", "Turoc", "Lana", "Yeyuni", "Catalino",
-  "Héctor", "Egle", "Sonata", "Poah", "Gris",
+  "Bell", "Turoc", "Lana", "Jejuni", "Catalino",
+  "Héctor", "Eglee", "Sonata", "Poah", "Gris",
   "Dior", "Wero", "Nimbus", "Medio bigote"
 ];
 
@@ -128,6 +128,8 @@ let popupEsResultado = false;
 let historialCache = [];
 let filtroGato = "todos";
 let busqueda = "";
+let ordenLista = "alfabetico";
+let ultimoGanador = null;
 
 /* ---------- Canvas & wheel ---------- */
 function setupCanvas() {
@@ -220,9 +222,8 @@ function spin() {
   spinning = true;
   actualizarGirar();
   ganadorEl.textContent = "…";
-  document.querySelectorAll("#lista-gatos li").forEach((li) => {
-    li.classList.remove("ganador");
-  });
+  ultimoGanador = null;
+  renderListaGatos();
 
   const targetIndex = Math.floor(Math.random() * N);
   const turns = 5 + Math.floor(Math.random() * 3);
@@ -260,9 +261,8 @@ function spin() {
 function announceWinner(idx) {
   const gato = gatos[idx];
   ganadorEl.textContent = gato;
-  document.querySelectorAll("#lista-gatos li").forEach((li, i) => {
-    li.classList.toggle("ganador", i === idx);
-  });
+  ultimoGanador = gato;
+  renderListaGatos();
   let meta = null;
   if (preguntaActiva) {
     meta = `${preguntaActiva.autor} preguntó: "${preguntaActiva.pregunta}"`;
@@ -538,10 +538,18 @@ function contarApariciones() {
 
 function renderListaGatos() {
   const counts = contarApariciones();
-  listaEl.innerHTML = gatos.map((g) => {
+  const ordenados = gatos.slice().sort((a, b) => {
+    if (ordenLista === "frecuencia") {
+      const diff = (counts[b] || 0) - (counts[a] || 0);
+      if (diff !== 0) return diff;
+    }
+    return a.localeCompare(b, "es");
+  });
+  listaEl.innerHTML = ordenados.map((g) => {
     const n = counts[g] || 0;
     const cero = n === 0 ? " cero" : "";
-    return `<li><button type="button" class="gato-item" data-gato="${escapar(g)}">
+    const ganador = g === ultimoGanador ? " ganador" : "";
+    return `<li class="${ganador.trim()}"><button type="button" class="gato-item" data-gato="${escapar(g)}">
       <span class="gato-nombre">${escapar(g)}</span>
       <span class="gato-contador${cero}" aria-label="${n} apariciones">${n}</span>
     </button></li>`;
@@ -579,6 +587,16 @@ listaEl.addEventListener("click", (e) => {
   const el = e.target.closest(".gato-item");
   if (!el) return;
   abrirPopupPreview(el.dataset.gato);
+});
+
+document.querySelectorAll(".orden-btn").forEach((b) => {
+  b.addEventListener("click", () => {
+    ordenLista = b.dataset.orden;
+    document.querySelectorAll(".orden-btn").forEach((x) => {
+      x.classList.toggle("activo", x === b);
+    });
+    renderListaGatos();
+  });
 });
 
 popupCerrarBtn.addEventListener("click", cerrarPopup);
