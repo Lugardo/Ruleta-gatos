@@ -116,7 +116,8 @@ const salirLibreBtn = document.getElementById("salir-libre");
 const estadoEl = document.getElementById("estado");
 const historialLista = document.getElementById("historial-lista");
 const historialVacio = document.getElementById("historial-vacio");
-const limpiarBtn = document.getElementById("limpiar-historial");
+const buscarInput = document.getElementById("historial-buscar");
+const filtroSelect = document.getElementById("historial-filtro-gato");
 
 let W = 600, H = 600, cx = 300, cy = 300, radius = 290;
 let rotation = 0;
@@ -124,6 +125,9 @@ let spinning = false;
 let preguntaActiva = null;
 let modoLibre = false;
 let popupEsResultado = false;
+let historialCache = [];
+let filtroGato = "todos";
+let busqueda = "";
 
 /* ---------- Canvas & wheel ---------- */
 function setupCanvas() {
@@ -461,41 +465,13 @@ async function guardarEntrada(entrada) {
     lista.unshift(entrada);
     escribirLocal(lista.slice(0, 200));
   }
-  await renderHistorial();
+  await refrescarTodo();
 }
 
-async function borrarEntrada(id) {
-  if (usingServer) {
-    try {
-      await fetch(`api/historial/${encodeURIComponent(id)}`, { method: "DELETE" });
-    } catch {
-      usingServer = false;
-      actualizarIndicadorAlmacen();
-    }
-  }
-  if (!usingServer) {
-    const lista = leerLocal().filter((e) => e.id !== id);
-    escribirLocal(lista);
-  }
-  await renderHistorial();
-}
-
-async function limpiarHistorial() {
-  const lista = await obtenerHistorial();
-  if (lista.length === 0) return;
-  if (!confirm(`¿Borrar las ${lista.length} preguntas del historial? Esta acción no se puede deshacer.`)) return;
-  if (usingServer) {
-    try {
-      await fetch("api/historial", { method: "DELETE" });
-    } catch {
-      usingServer = false;
-      actualizarIndicadorAlmacen();
-    }
-  }
-  if (!usingServer) {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-  await renderHistorial();
+async function refrescarTodo() {
+  historialCache = await obtenerHistorial();
+  renderListaGatos();
+  renderHistorialUI();
 }
 
 /* ---------- History render ---------- */
@@ -515,8 +491,18 @@ function formatearFecha(iso) {
   } catch { return iso; }
 }
 
-async function renderHistorial() {
-  const lista = await obtenerHistorial();
+function renderHistorialUI() {
+  const filtro = filtroGato === "todos" ? null : filtroGato;
+  const q = busqueda.trim().toLowerCase();
+  const lista = historialCache.filter((e) => {
+    if (filtro && e.gato !== filtro) return false;
+    if (q) {
+      const enAutor = (e.autor || "").toLowerCase().includes(q);
+      const enPreg = (e.pregunta || "").toLowerCase().includes(q);
+      if (!enAutor && !enPreg) return false;
+    }
+    return true;
+  });
   historialLista.innerHTML = lista.map((e) => `
     <li class="historial-item" data-id="${escapar(e.id || "")}">
       <div class="contenido">
@@ -528,17 +514,44 @@ async function renderHistorial() {
         <p class="preg">"${escapar(e.pregunta)}"</p>
         <p class="resp">🐱 ${escapar(e.gato)}</p>
       </div>
-      <button type="button" class="borrar-item" aria-label="Borrar esta pregunta" title="Borrar">×</button>
     </li>
   `).join("");
-  historialVacio.hidden = lista.length > 0;
-  limpiarBtn.hidden = lista.length === 0;
+  if (historialCache.length === 0) {
+    historialVacio.textContent = "Aún no hay preguntas guardadas.";
+    historialVacio.hidden = false;
+  } else if (lista.length === 0) {
+    historialVacio.textContent = "Ningún resultado coincide con tu búsqueda.";
+    historialVacio.hidden = false;
+  } else {
+    historialVacio.hidden = true;
+  }
 }
 
-function renderList() {
-  listaEl.innerHTML = gatos
-    .map((g) => `<li><button type="button" class="gato-item" data-gato="${escapar(g)}">${escapar(g)}</button></li>`)
-    .join("");
+function contarApariciones() {
+  const counts = Object.create(null);
+  for (const e of historialCache) {
+    if (!e || !e.gato) continue;
+    counts[e.gato] = (counts[e.gato] || 0) + 1;
+  }
+  return counts;
+}
+
+function renderListaGatos() {
+  const counts = contarApariciones();
+  listaEl.innerHTML = gatos.map((g) => {
+    const n = counts[g] || 0;
+    const cero = n === 0 ? " cero" : "";
+    return `<li><button type="button" class="gato-item" data-gato="${escapar(g)}">
+      <span class="gato-nombre">${escapar(g)}</span>
+      <span class="gato-contador${cero}" aria-label="${n} apariciones">${n}</span>
+    </button></li>`;
+  }).join("");
+}
+
+function poblarFiltroGatos() {
+  const opciones = [`<option value="todos">Todos los gatos</option>`]
+    .concat(gatos.map((g) => `<option value="${escapar(g)}">${escapar(g)}</option>`));
+  filtroSelect.innerHTML = opciones.join("");
 }
 
 /* ---------- Events ---------- */
@@ -552,15 +565,15 @@ salirLibreBtn.addEventListener("click", salirLibre);
 
 btn.addEventListener("click", spin);
 
-historialLista.addEventListener("click", (e) => {
-  const btnBorrar = e.target.closest(".borrar-item");
-  if (!btnBorrar) return;
-  const item = btnBorrar.closest(".historial-item");
-  const id = item && item.dataset.id;
-  if (id) borrarEntrada(id);
+buscarInput.addEventListener("input", (e) => {
+  busqueda = e.target.value;
+  renderHistorialUI();
 });
 
-limpiarBtn.addEventListener("click", limpiarHistorial);
+filtroSelect.addEventListener("change", (e) => {
+  filtroGato = e.target.value;
+  renderHistorialUI();
+});
 
 listaEl.addEventListener("click", (e) => {
   const el = e.target.closest(".gato-item");
@@ -579,11 +592,13 @@ document.addEventListener("keydown", (e) => {
 
 window.addEventListener("resize", setupCanvas);
 
-renderList();
+poblarFiltroGatos();
+renderListaGatos();
+renderHistorialUI();
 setupCanvas();
 actualizarGirar();
 
 (async () => {
   await detectarServidor();
-  await renderHistorial();
+  await refrescarTodo();
 })();

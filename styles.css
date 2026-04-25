@@ -485,9 +485,12 @@ body {
   background: transparent;
 }
 .lista .gato-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  padding: 7px 12px;
+  padding: 7px 10px 7px 12px;
   border-radius: 10px;
   border: none;
   background: #fafaff;
@@ -497,6 +500,35 @@ body {
   text-align: left;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+.lista .gato-nombre {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lista .gato-contador {
+  flex: 0 0 auto;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  min-width: 24px;
+  text-align: center;
+  line-height: 1.4;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.lista .gato-contador.cero {
+  background: #f0ecf5;
+  color: var(--ink-mute);
+}
+.lista li.ganador .gato-contador,
+.lista li.ganador .gato-contador.cero {
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
 }
 .lista .gato-item:hover {
   background: var(--accent-soft);
@@ -546,6 +578,42 @@ body {
 }
 .almacen-indicador.remoto { background: #e3f6e7; color: #2e8b57; }
 .almacen-indicador.local  { background: #fff1cc; color: #8a6a1a; }
+
+.historial-filtros {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.historial-buscar,
+.historial-select {
+  flex: 1 1 180px;
+  min-width: 0;
+  font: inherit;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fafaff;
+  color: var(--ink);
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+.historial-buscar:focus,
+.historial-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 111, 163, 0.15);
+}
+.historial-select {
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6480' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 36px;
+}
 
 .historial-lista {
   list-style: none;
